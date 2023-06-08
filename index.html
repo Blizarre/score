@@ -20,6 +20,7 @@
             margin: 30px;
             margin-left: auto;
             margin-right: auto;
+            font-size: 70%;
         }
 
         thead {
@@ -28,7 +29,7 @@
 
         button {
             width: 25%;
-            height: 100px;
+            height: 80px;
             font-weight: bold;
             margin: 3px;
             font-size: 100%;
@@ -111,7 +112,7 @@
             var total_score = 0;
 
             // create a header in the table
-            table.innerHTML = "<thead><tr><td colspan=6>Score</td><td>Row Score</td></tr></thead><tbody></tbody>";
+            table.innerHTML = "<thead><tr><td colspan=6>Score</td><td>Row Score</td><td>Cum. Score</td></tr></thead><tbody></tbody>";
 
             state = State.get();
 
@@ -131,10 +132,16 @@
                         row.appendChild(cell);
                     }
                 }
-                var cell = document.createElement("td");
-                cell.innerText = row_score;
                 total_score += row_score;
-                row.appendChild(cell);
+
+                var cell_row_score = document.createElement("td");
+                cell_row_score.innerText = row_score;
+
+                var cell_cum_score = document.createElement("td");
+                cell_cum_score.innerText = total_score;
+
+                row.appendChild(cell_row_score);
+                row.appendChild(cell_cum_score);
                 table.appendChild(row);
             }
 
