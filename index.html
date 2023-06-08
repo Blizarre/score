@@ -92,6 +92,17 @@
         }
 
         function add_to_total_score(element) {
+            var value = parseInt(element.innerHTML)
+            var state = State.get()
+            // Make sure that the numbers are in descending order for a row
+            if (state.length % 6 > 0) {
+                last_element = State.get().slice(-1)[0];
+                if (value > last_element) {
+                    alert("You can't add a number that is bigger than the last number in the row")
+                    return;
+                }
+            }
+
             State.push(parseInt(element.innerHTML))
             refresh();
         }
