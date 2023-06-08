@@ -50,16 +50,16 @@
 
 <body>
     <div>
-        <button onclick="add_to_total_score(this)">1</button>
-        <button onclick="add_to_total_score(this)">2</button>
-        <button onclick="add_to_total_score(this)">3</button>
-        <button onclick="add_to_total_score(this)">4</button>
-        <button onclick="add_to_total_score(this)">5</button>
-        <button onclick="add_to_total_score(this)">6</button>
-        <button onclick="add_to_total_score(this)">7</button>
-        <button onclick="add_to_total_score(this)">8</button>
-        <button onclick="add_to_total_score(this)">9</button>
-        <button onclick="add_to_total_score(this)">0</button>
+        <button onclick="add_to_total_score_element(this)">1</button>
+        <button onclick="add_to_total_score_element(this)">2</button>
+        <button onclick="add_to_total_score_element(this)">3</button>
+        <button onclick="add_to_total_score_element(this)">4</button>
+        <button onclick="add_to_total_score_element(this)">5</button>
+        <button onclick="add_to_total_score_element(this)">6</button>
+        <button onclick="add_to_total_score_element(this)">7</button>
+        <button onclick="add_to_total_score_element(this)">8</button>
+        <button onclick="add_to_total_score_element(this)">9</button>
+        <button onclick="add_to_total_score_element(this)">0</button>
         <button onclick="delete_last_score()">⌫</button>
         <button onclick="reset_state()">🗑️</button>
     </div>
@@ -91,19 +91,23 @@
             }
         }
 
-        function add_to_total_score(element) {
-            var value = parseInt(element.innerHTML)
+        function add_to_total_score_element(element) {
+            var score = parseInt(element.innerHTML)
+            add_to_total_score(score)
+        }
+
+        function add_to_total_score(value) {
             var state = State.get()
             // Make sure that the numbers are in descending order for a row
             if (state.length % 6 > 0) {
                 last_element = State.get().slice(-1)[0];
                 if (value > last_element) {
-                    alert("You can't add a number that is bigger than the last number in the row")
+                    alert("You can't add a number that is bigger than the previous number in the end")
                     return;
                 }
             }
 
-            State.push(parseInt(element.innerHTML))
+            State.push(value)
             refresh();
         }
 
@@ -124,7 +128,7 @@
             var total_score = 0;
 
             // create a header in the table
-            table_all.innerHTML = "<thead><tr><td colspan=6>Score</td><td>Row Score</td><td>Cum. Score</td></tr></thead>";
+            table_all.innerHTML = "<thead><tr><td colspan=6>Score</td><td>End Score</td><td>Cum. Score</td></tr></thead>";
             table_current_row.innerHTML = ""
             state = State.get();
 
@@ -172,10 +176,8 @@
             var charCode = (typeof e.which == "number") ? e.which : e.keyCode;
             if (charCode) {
                 var number = String.fromCharCode(charCode);
-                if (number >= '1' && number <= '9') {
-                    add_to_total_score({
-                        innerHTML: number
-                    });
+                if (number >= '0' && number <= '9') {
+                    add_to_total_score(number);
                 }
             }
         };
