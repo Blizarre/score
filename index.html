@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>🏹</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
     <style>
         body {
@@ -21,6 +21,7 @@
             margin-left: auto;
             margin-right: auto;
             font-size: 70%;
+            text-align: center;
         }
 
         thead {
@@ -63,8 +64,9 @@
         <button onclick="reset_state()">🗑️</button>
     </div>
 
+    <table id="current_row">
 
-    <table style="text-align: center;" id="scoresheet">
+    <table id="scoresheet">
 
     </table>
 
@@ -119,12 +121,13 @@
         }
 
         function refresh() {
-            var table = document.getElementById("scoresheet");
+            var table_all = document.getElementById("scoresheet");
+            var table_current_row = document.getElementById("current_row");
             var total_score = 0;
 
             // create a header in the table
-            table.innerHTML = "<thead><tr><td colspan=6>Score</td><td>Row Score</td><td>Cum. Score</td></tr></thead><tbody></tbody>";
-
+            table_all.innerHTML = "<thead><tr><td colspan=6>Score</td><td>Row Score</td><td>Cum. Score</td></tr></thead>";
+            table_current_row.innerHTML = ""
             state = State.get();
 
             // Create as many rows of up to 6 elements from the state as possible, keeping state untouched.
@@ -151,9 +154,15 @@
                 var cell_cum_score = document.createElement("td");
                 cell_cum_score.innerText = total_score;
 
+
+                if (state.length == 0) {
+                    table_current_row.replaceChildren(row.cloneNode(true))
+                }
+
                 row.appendChild(cell_row_score);
+
                 row.appendChild(cell_cum_score);
-                table.appendChild(row);
+                table_all.appendChild(row);
             }
 
             var total_score = document.getElementById("total_score").innerHTML = total_score;
