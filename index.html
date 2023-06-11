@@ -185,7 +185,7 @@
                 /* 2 end Score Column */
                 if (cell_2end_score == null) {
                     // If we don't have a cell_2end_score, create it and add it to the row
-                    cell_2end_score = create_cell(0);
+                    cell_2end_score = create_cell(row_score);
                     cell_2end_score.rowSpan = 2;
                     new_row.appendChild(cell_2end_score);
                 } else {
