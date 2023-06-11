@@ -108,63 +108,103 @@
             }
 
             State.push(value)
-            refresh();
+            refresh_ui();
         }
 
         function delete_last_score() {
             State.pop();
-            refresh();
+            refresh_ui();
         }
 
 
         function reset_state() {
             State.clear();
-            refresh();
+            refresh_ui();
         }
 
-        function refresh() {
+        function create_cell(value) {
+            var cell = document.createElement("td");
+            cell.innerHTML = value;
+            return cell;
+        }
+
+        function refresh_ui() {
             var table_all = document.getElementById("scoresheet");
-            var table_current_row = document.getElementById("current_row");
+            var table_preview = document.getElementById("current_row");
             var total_score = 0;
 
-            // create a header in the table
-            table_all.innerHTML = "<thead><tr><td colspan=6>Score</td><td>End Score</td><td>Cum. Score</td></tr></thead>";
-            table_current_row.innerHTML = ""
+            // table for the full scoresheet
+            table_all.innerHTML = `
+                <thead>
+                    <tr>
+                        <td colspan=6>Score</td>
+                        <td>End Score</td>
+                        <td>2 end Score</td>
+                        <td>Cum. Score</td>
+                    </tr>
+                </thead>`;
+
+            // table for the small preview at the top (so we always see the scores we enter,
+            // no matter how many rows we have)
+            table_preview.innerHTML = ""
+
             state = State.get();
 
-            // Create as many rows of up to 6 elements from the state as possible, keeping state untouched.
+            // Used to keep track of the Cumulative score of the last 2 ends (one dozen arrows)
+            // This is used to calculate the "2 end score" column
+            var cell_2end_score = null;
+            var last_score = 0;
+
+            // Create as many rows of up to 6 elements from the state as possible
             while (state.length > 0) {
-                var row = document.createElement("tr");
+                var new_row = document.createElement("tr");
                 var row_score = 0;
                 for (var i = 0; i < 6; i++) {
                     if (state.length > 0) {
-                        var cell = document.createElement("td");
-                        cell.innerHTML = state.shift();
-                        row_score += parseInt(cell.innerHTML);
-                        row.appendChild(cell);
+                        var score = parseInt(state.shift())
+                        var cell = create_cell(score);
+                        row_score += score;
+                        new_row.appendChild(cell);
                     } else {
-                        var cell = document.createElement("td");
-                        cell.innerHTML = '-';
-                        row.appendChild(cell);
+                        new_row.appendChild(create_cell("-"));
                     }
                 }
                 total_score += row_score;
 
-                var cell_row_score = document.createElement("td");
-                cell_row_score.innerText = row_score;
+                /* Preview table */
 
-                var cell_cum_score = document.createElement("td");
-                cell_cum_score.innerText = total_score;
-
-
+                // If we are on the last row (no more state to pop() from),
+                // display that row on the preview table (make a copy without the additional cells)
                 if (state.length == 0) {
-                    table_current_row.replaceChildren(row.cloneNode(true))
+                    table_preview.replaceChildren(new_row.cloneNode(true))
                 }
 
-                row.appendChild(cell_row_score);
+                /* End Score Column */
+                new_row.appendChild(create_cell(row_score));
 
-                row.appendChild(cell_cum_score);
-                table_all.appendChild(row);
+                /* 2 end Score Column */
+                if (cell_2end_score == null) {
+                    // If we don't have a cell_2end_score, create it and add it to the row
+                    cell_2end_score = create_cell(0);
+                    cell_2end_score.rowSpan = 2;
+                    new_row.appendChild(cell_2end_score);
+                } else {
+                    // If we have a cell_2end_score, write the score of the last 2 end and add it to the row.
+                    // Then reset it for the next iteration
+                    cell_2end_score.innerText = row_score + last_score;
+                    cell_2end_score = null;
+                }
+                last_score = row_score;
+
+
+                /* Cumulative Score Column */
+                new_row.appendChild(create_cell(total_score));
+
+
+                /* Update the table with the new row */
+
+                table_all.appendChild(new_row);
+
             }
 
             var total_score = document.getElementById("total_score").innerHTML = total_score;
@@ -182,7 +222,7 @@
             }
         };
 
-        refresh();
+        refresh_ui();
 
     </script>
 
