@@ -108,6 +108,14 @@
             char() {
                 return this._char;
             }
+
+            is_better_than(other) {
+                // edge case where X is larger than 10 despite having the same score
+                if (this.char() == "X" && other.char() != "X") {
+                    return true;
+                }
+                return this.score() > other.score();
+            }
         }
 
         State = {
@@ -154,18 +162,18 @@
             add_to_total_score(new Score(element.innerHTML))
         }
 
-        function add_to_total_score(score) {
+        function add_to_total_score(new_score) {
             var state = State.getScores()
             // Make sure that the numbers are in descending order for a row
             if (state.length % 6 > 0) {
                 last_element = state.slice(-1)[0];
-                if (score.score() > last_element.score()) {
+                if (new_score.is_better_than(last_element)) {
                     alert("You can't add a number that is bigger than the previous number in the end")
                     return;
                 }
             }
 
-            State.pushScore(score)
+            State.pushScore(new_score)
             refresh_ui();
         }
 
