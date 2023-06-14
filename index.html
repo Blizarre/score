@@ -3,8 +3,9 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>🏹</title>
+    <title>Archery Scorecard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="manifest" href="/manifest.json">
 
     <style>
         body {
@@ -311,5 +312,12 @@
         refresh_ui();
 
     </script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js', { scope: '/' });
+        }
+    </script>
+</body>
 
 </html>

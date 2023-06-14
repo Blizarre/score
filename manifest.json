@@ -1,0 +1,17 @@
+{
+    "lang": "en-gb",
+    "name": "Archery Score",
+    "short_name": "Archery Score",
+    "description": "A simple app to fill scorecards for archery",
+    "start_url": "/",
+    "background_color": "#2f3d58",
+    "theme_color": "#2f3d58",
+    "orientation": "any",
+    "display": "standalone",
+    "icons": [
+        {
+            "src": "/icon512.png",
+            "sizes": "512x512"
+        }
+    ]
+}
