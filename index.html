@@ -36,6 +36,10 @@
             font-size: 100%;
         }
 
+        select {
+            font-size: 100%;
+            margin-bottom: 1em;
+        }
 
         td {
             border: 1px solid black;
@@ -51,87 +55,155 @@
 <body>
     <div>
         <button onclick="add_to_total_score_element(this)">1</button>
-        <button onclick="add_to_total_score_element(this)">2</button>
+        <button class="extended" onclick="add_to_total_score_element(this)">2</button>
         <button onclick="add_to_total_score_element(this)">3</button>
-        <button onclick="add_to_total_score_element(this)">4</button>
+        <button class="extended" onclick="add_to_total_score_element(this)">4</button>
         <button onclick="add_to_total_score_element(this)">5</button>
-        <button onclick="add_to_total_score_element(this)">6</button>
+        <button class="extended" onclick="add_to_total_score_element(this)">6</button>
         <button onclick="add_to_total_score_element(this)">7</button>
-        <button onclick="add_to_total_score_element(this)">8</button>
+        <button class="extended" onclick="add_to_total_score_element(this)">8</button>
         <button onclick="add_to_total_score_element(this)">9</button>
-        <button onclick="add_to_total_score_element(this)">0</button>
+        <button class="extended" onclick="add_to_total_score_element(this)">10</button>
+        <button onclick="add_to_total_score_element(this)">M</button>
+        <button class="extended" onclick="add_to_total_score_element(this)">X</button>
         <button onclick="delete_last_score()">⌫</button>
         <button onclick="reset_state()">🗑️</button>
     </div>
+
 
     <table id="current_row"></table>
 
     <table id="scoresheet"></table>
 
-    <h2>Total score 🏹</h2>
-    <div id="total_score">0</div>
+    <h2>Score 🏹 <span id="total_score">0</span></h2>
+
+    <div>
+        <select id="zones" onchange="update_zones(this)">
+            <option value="5Z">5 zones</option>
+            <option value="10Z">10 zones</option>
+        </select>
+        </div>
 
     <script>
-        State = {
-            push: function (score) {
-                state = JSON.parse(localStorage.getItem("state") || "[]")
-                state.push(score);
-                localStorage.setItem("state", JSON.stringify(state))
-            },
-            pop: function () {
-                state = JSON.parse(localStorage.getItem("state") || "[]")
-                state.pop();
-                localStorage.setItem("state", JSON.stringify(state))
-            },
-            clear: function () {
-                localStorage.setItem("state", JSON.stringify([]))
-            },
-            get: function () {
-                return JSON.parse(localStorage.getItem("state") || "[]")
+
+        // Helper class to deal with the conversion between the char representation
+        // of a score (M, X, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+        // and the associated numerical value (0, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+        class Score {
+            constructor(char) {
+                this._char = char;
+            }
+
+            score() {
+                switch (this._char) {
+                    case "M":
+                        return 0;
+                    case "X":
+                        return 10;
+                    default:
+                        return parseInt(this._char);
+                }
+            }
+
+            char() {
+                return this._char;
             }
         }
 
-        function add_to_total_score_element(element) {
-            var score = parseInt(element.innerHTML)
-            add_to_total_score(score)
+        State = {
+            // Helpers to fetch / store Score objects into the local storage
+            // as Json strings
+            pushScore: function (score) {
+                state = JSON.parse(localStorage.getItem("state") || "[]")
+                state.push(score.char());
+                localStorage.setItem("state", JSON.stringify(state))
+            },
+            popScore: function () {
+                state = JSON.parse(localStorage.getItem("state") || "[]")
+                value = state.pop();
+                localStorage.setItem("state", JSON.stringify(state))
+                return new Score(value);
+            },
+            clearScores: function () {
+                localStorage.setItem("state", JSON.stringify([]))
+            },
+            getScores: function () {
+                scores = []
+                JSON.parse(localStorage.getItem("state") || "[]").forEach(value => {
+                    scores.push(new Score(value))
+                });
+                return scores;
+            },
+
+            // Helpers to fetch / store the zones selected by the user
+            getZones: function () {
+                return localStorage.getItem("zones") || "5Z"
+            },
+            setZones: function (zones) {
+                localStorage.setItem("zones", zones)
+            }
         }
 
-        function add_to_total_score(value) {
-            var state = State.get()
+        function update_zones(element) {
+            var zones = element.value;
+            State.setZones(zones)
+            refresh_ui();
+        }
+
+        function add_to_total_score_element(element) {
+            add_to_total_score(new Score(element.innerHTML))
+        }
+
+        function add_to_total_score(score) {
+            var state = State.getScores()
             // Make sure that the numbers are in descending order for a row
             if (state.length % 6 > 0) {
-                last_element = State.get().slice(-1)[0];
-                if (value > last_element) {
+                last_element = state.slice(-1)[0];
+                if (score.score() > last_element.score()) {
                     alert("You can't add a number that is bigger than the previous number in the end")
                     return;
                 }
             }
 
-            State.push(value)
+            State.pushScore(score)
             refresh_ui();
         }
 
         function delete_last_score() {
-            State.pop();
+            State.popScore();
             refresh_ui();
         }
 
 
         function reset_state() {
-            State.clear();
+            State.clearScores();
             refresh_ui();
         }
 
-        function create_cell(value) {
+        function create_cell(content) {
             var cell = document.createElement("td");
-            cell.innerHTML = value;
+            cell.innerHTML = content;
             return cell;
+        }
+
+        function refresh_keyboard_ui() {
+            // Update the keyboard with the zones selected by the user
+            var display_value = State.getZones() == "10Z" ? "inline-block" : "none";
+            var extended_elements = document.getElementsByClassName("extended");
+            for (var i = 0; i < extended_elements.length; i++) {
+                extended_elements[i].style.display = display_value;
+            }
+            zones_toggle = document.getElementById("zones");
+            zones_toggle.value = State.getZones();
         }
 
         function refresh_ui() {
             var table_all = document.getElementById("scoresheet");
             var table_preview = document.getElementById("current_row");
             var total_score = 0;
+
+            refresh_keyboard_ui();
+
 
             // table for the full scoresheet
             table_all.innerHTML = `
@@ -148,7 +220,7 @@
             // no matter how many rows we have)
             table_preview.innerHTML = ""
 
-            state = State.get();
+            state = State.getScores();
 
             // Used to keep track of the Cumulative score of the last 2 ends (one dozen arrows)
             // This is used to calculate the "2 end score" column
@@ -161,9 +233,9 @@
                 var row_score = 0;
                 for (var i = 0; i < 6; i++) {
                     if (state.length > 0) {
-                        var score = parseInt(state.shift())
-                        var cell = create_cell(score);
-                        row_score += score;
+                        var score = state.shift()
+                        var cell = create_cell(score.char());
+                        row_score += score.score();
                         new_row.appendChild(cell);
                     } else {
                         new_row.appendChild(create_cell("-"));
@@ -173,7 +245,7 @@
 
                 /* Preview table */
 
-                // If we are on the last row (no more state to pop() from),
+                // If we are on the last row (no more state to popScore() from),
                 // display that row on the preview table (make a copy without the additional cells)
                 if (state.length == 0) {
                     table_preview.replaceChildren(new_row.cloneNode(true))
@@ -213,11 +285,17 @@
         // capture keyboard and call add_to_total_score with the number
         document.onkeypress = function (e) {
             e = e || window.event;
-            var charCode = (typeof e.which == "number") ? e.which : e.keyCode;
-            if (charCode) {
-                var number = String.fromCharCode(charCode);
-                if (number >= '0' && number <= '9') {
-                    add_to_total_score(number);
+            var charCode = e.which;
+            if (e.which) {
+                var char = String.fromCharCode(charCode);
+                if (char > '0' && char <= '9') {
+                    add_to_total_score(new Score(char));
+                }
+                if (char == '0' || char == 'M') {
+                    add_to_total_score(new Score('M'));
+                }
+                if (char == 'X') {
+                    add_to_total_score(new Score('X'));
                 }
             }
         };
