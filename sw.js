@@ -2,33 +2,35 @@ const CACHE_NAME = `archery-scorecard-cache-v1`;
 
 // Use the install event to pre-cache all initial resources.
 self.addEventListener('install', event => {
-  event.waitUntil((async () => {
-    const cache = await caches.open(CACHE_NAME);
-    cache.addAll([
-      '/',
-    ]);
-  })());
+    event.waitUntil((async () => {
+        const cache = await caches.open(CACHE_NAME);
+        cache.addAll([
+            '/',
+        ]);
+    })());
 });
 
-self.addEventListener('fetch', event => {
-  event.respondWith((async () => {
-    const cache = await caches.open(CACHE_NAME);
+// Cache and update strategy from
+// https://serviceworke.rs/strategy-cache-and-update_service-worker_doc.html
 
-    // Get the resource from the cache.
-    const cachedResponse = await cache.match(event.request);
-    if (cachedResponse) {
-      return cachedResponse;
-    } else {
-        try {
-          // If the resource was not in the cache, try the network.
-          const fetchResponse = await fetch(event.request);
-
-          // Save the resource in the cache and return it.
-          cache.put(event.request, fetchResponse.clone());
-          return fetchResponse;
-        } catch (e) {
-          // The network failed.
-        }
-    }
-  })());
+self.addEventListener('fetch', function (evt) {
+    console.log('The service worker is serving the asset.');
+    evt.respondWith(fromCache(evt.request));
+    evt.waitUntil(update(evt.request));
 });
+
+function fromCache(request) {
+    return caches.open(CACHE_NAME).then(function (cache) {
+        return cache.match(request).then(function (matching) {
+            return matching || Promise.reject('no-match');
+        });
+    });
+}
+
+function update(request) {
+    return caches.open(CACHE_NAME).then(function (cache) {
+        return fetch(request).then(function (response) {
+            return cache.put(request, response);
+        });
+    });
+}
