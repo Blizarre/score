@@ -14,7 +14,7 @@ const isInstalledIOS = 'standalone' in window.navigator && window.navigator.stan
 if (iOS() && !isInstalledIOS) {
     buttonInstall.removeAttribute('hidden');
     buttonInstall.addEventListener('click', async () => {
-        alert("To install the application on your home screen, on safari click on the share button and then 'Add to Home Screen'")
+        alert("To install the application on your home screen on safari: click on the share button and then 'Add to Home Screen', then confirm.")
     });
 } else {
     // Initialize deferredPrompt for use later to show browser install prompt.
