@@ -7,6 +7,7 @@ self.addEventListener('install', event => {
         cache.addAll([
             '/',
             '/pwa.js',
+            '/icon512.png',
         ]);
     })());
 });
