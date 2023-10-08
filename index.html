@@ -89,7 +89,7 @@
             <option value="10Z">10 zones target</option>
         </select>
 
-        <select id="validation" onchange="update_validation(this)">
+        <select id="end_length" onchange="update_end_length(this)">
             <option value="3">3 shots per end</option>
             <option value="6">6 shots per end</option>
         </select>
@@ -164,24 +164,21 @@
             setZones: function (zones) {
                 localStorage.setItem("zones", zones)
             },
-            getValidation: function () {
-                return parseInt(localStorage.getItem("validation") || "6")
+            getEndLength: function () {
+                return parseInt(localStorage.getItem("end_length") || "6")
             },
-            setValidation: function (validation) {
-                localStorage.setItem("validation", validation)
+            setEndLength: function (end_length) {
+                localStorage.setItem("end_length", end_length)
             }
         }
 
         function update_zones(element) {
-            var zones = element.value;
-            State.setZones(zones)
+            State.setZones(element.value)
             refresh_ui();
         }
 
-        function update_validation(element) {
-            var validation = element.value;
-            State.setValidation(validation)
-            refresh_ui();
+        function update_end_length(element) {
+            State.setEndLength(element.value)
         }
 
         function add_to_total_score_element(element) {
@@ -190,8 +187,8 @@
 
         function add_to_total_score(new_score) {
             var state = State.getScores()
-            // Make sure that the numbers are in descending order for a row
-            if (state.length % State.getValidation() > 0) {
+            // Make sure that the numbers are in descending order for an end
+            if (state.length % State.getEndLength() > 0) {
                 last_element = state.slice(-1)[0];
                 if (new_score.is_better_than(last_element)) {
                     alert("You can't add a number that is bigger than the previous number in the end")
@@ -232,8 +229,8 @@
             zones_toggle = document.getElementById("zones");
             zones_toggle.value = State.getZones();
 
-            validation_toggle = document.getElementById("validation");
-            validation_toggle.value = State.getValidation();
+            end_length_toggle = document.getElementById("end_length");
+            end_length_toggle.value = State.getEndLength();
         }
 
         function refresh_ui() {
